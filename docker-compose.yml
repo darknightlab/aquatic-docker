@@ -1,0 +1,37 @@
+services:
+  aquatic-udp:
+    image: darknightlab/aquatic-udp
+    build:
+      context: .
+      dockerfile: udp.Dockerfile
+    restart: always
+    container_name: aquatic-udp
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./config:/aquatic/config
+
+  aquatic-http:
+    image: darknightlab/aquatic-http
+    build:
+      context: .
+      dockerfile: http.Dockerfile
+    restart: always
+    container_name: aquatic-http
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./config:/aquatic/config
+    
+  aquatic-ws:
+    image: darknightlab/aquatic-ws
+    build:
+      context: .
+      dockerfile: ws.Dockerfile
+    restart: always
+    container_name: aquatic-ws
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./config:/aquatic/config
+
