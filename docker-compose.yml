@@ -3,7 +3,9 @@ services:
     image: darknightlab/aquatic-udp
     build:
       context: .
-      dockerfile: udp.Dockerfile
+      dockerfile: Dockerfile
+      args:
+        CRATE: udp
     restart: always
     container_name: aquatic-udp
     ports:
@@ -15,7 +17,9 @@ services:
     image: darknightlab/aquatic-http
     build:
       context: .
-      dockerfile: http.Dockerfile
+      dockerfile: Dockerfile
+      args:
+        CRATE: http
     restart: always
     container_name: aquatic-http
     ports:
@@ -27,7 +31,9 @@ services:
     image: darknightlab/aquatic-ws
     build:
       context: .
-      dockerfile: ws.Dockerfile
+      dockerfile: Dockerfile
+      args:
+        CRATE: ws
     restart: always
     container_name: aquatic-ws
     ports:

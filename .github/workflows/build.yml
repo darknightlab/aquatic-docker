@@ -1,0 +1,61 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      aquatic_ref:
+        description: "greatest-ape/aquatic git ref (branch, tag or commit)"
+        default: master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        crate: [ws, udp, http]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        id: hub
+        continue-on-error: true
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Tags
+        id: tags
+        run: |
+          tags="ghcr.io/${{ github.repository_owner }}/aquatic-${{ matrix.crate }}:latest"
+          if [ "${{ steps.hub.outcome }}" = "success" ]; then
+            tags="$tags,docker.io/darknightlab/aquatic-${{ matrix.crate }}:latest"
+          fi
+          echo "tags=$tags" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/amd64
+          push: true
+          build-args: |
+            CRATE=${{ matrix.crate }}
+            AQUATIC_REF=${{ github.event.inputs.aquatic_ref || 'master' }}
+          tags: ${{ steps.tags.outputs.tags }}
+          cache-from: type=gha,scope=${{ matrix.crate }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.crate }}
